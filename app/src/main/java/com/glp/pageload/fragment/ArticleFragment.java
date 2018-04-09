@@ -98,7 +98,7 @@ public class ArticleFragment extends BaseFragment {
         mLoadMoreHelper.setLoadMoreListener(new SwipeToLoadHelper.LoadMoreListener() {
             @Override
             public void onLoad() {
-                // 请求更多数据 并且禁用SwipeRefresh功能
+                // 请求更多数据时禁用SwipeRefresh功能
                 mRefreshLayout.setEnabled(false);
 
                 getAndroidList(mPageSize, ++mPage);
@@ -110,14 +110,7 @@ public class ArticleFragment extends BaseFragment {
         HttpRepository.getInstance(mContext).getAndroidArticleList(getArguments().getString(TITLE), pageSize, page, new DataSource.RequestCallback<HttpResult<ArticleBean>>() {
             @Override
             public void onDataLoaded(HttpResult<ArticleBean> result) {
-                // 加载成功 如果下拉刷新正在刷新，则停止刷新
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
-                }
-                //  加载更多完成，刷新界面显示 并且解禁SwipeRefresh功能
-                if (!mRefreshLayout.isEnabled()) {
-                    mRefreshLayout.setEnabled(true);
-                }
+                resetRefreshLayout();
 
                 if (result.isError()) {
                     Toast.makeText(mContext, "请求出错", Toast.LENGTH_SHORT).show();
@@ -131,26 +124,16 @@ public class ArticleFragment extends BaseFragment {
                     List<ArticleBean> newData = result.getResults();
                     mList.addAll(newData);
 
-                    if (mList.size() < mPageSize) {
-                        // 如果加载回来的数据都不足一页，则禁用“上拉加载更多”
-                        mLoadMoreHelper.setLoadMoreEnabled(false);
-                    } else {
-                        mLoadMoreHelper.setLoadMoreEnabled(true);
-                    }
-
+                    // 将请求回来的数据添加进 mList 数据源,如果不够一页内容,则禁用上拉加载更多
+                    mLoadMoreHelper.setLoadMoreEnabled(mList.size() >= mPageSize);
+                    // 设置加载完成,通过新加载回来的数据与pageSize的关系来判断还有没有更多内容
                     mLoadMoreHelper.setLoadMoreFinish(newData.size() < mPageSize);
                 }
             }
 
             @Override
             public void onDataError(String msg) {
-                if (mRefreshLayout.isRefreshing()) {
-                    mRefreshLayout.setRefreshing(false);
-                }
-                //  加载出错，解禁SwipeRefresh功能
-                if (!mRefreshLayout.isEnabled()) {
-                    mRefreshLayout.setEnabled(true);
-                }
+                resetRefreshLayout();
                 mLoadMoreHelper.setLoadMoreFinish(false);
 
                 if (mPage != 1) {
@@ -165,5 +148,20 @@ public class ArticleFragment extends BaseFragment {
             }
         });
     }
+
+    /**
+     * 重置 下拉刷新布局的状态
+     */
+    private void resetRefreshLayout() {
+        // 如果下拉刷新处于正在刷新状态，则停止刷新动画
+        if (mRefreshLayout.isRefreshing()) {
+            mRefreshLayout.setRefreshing(false);
+        }
+        // 如果下拉刷新仍处于被禁用状态,则启用
+        if (!mRefreshLayout.isEnabled()) {
+            mRefreshLayout.setEnabled(true);
+        }
+    }
+
 
 }

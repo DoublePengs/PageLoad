@@ -13,7 +13,6 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
 
-    private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private AdapterWrapper mAdapterWrapper;
     private LoadMoreListener mListener;
@@ -40,7 +39,7 @@ public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-        if (mLoadMoreEnabled && SCROLL_STATE_IDLE == newState && !mLoading){
+        if (mLoadMoreEnabled && SCROLL_STATE_IDLE == newState && !mLoading) {
 
             LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mLayoutManager;
             int lastCompletePosition = linearLayoutManager.findLastCompletelyVisibleItemPosition();
@@ -52,7 +51,7 @@ public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
                     return;
                 ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) child.getLayoutParams();
 
-                int deltaY = recyclerView.getBottom() - recyclerView.getPaddingBottom() - child.getBottom() - lp.bottomMargin - child.getPaddingBottom();
+                int deltaY = recyclerView.getBottom() - recyclerView.getPaddingBottom() - child.getBottom() - lp.bottomMargin;
                 if (deltaY > 0 && firstCompletePosition != 0) {
                     recyclerView.smoothScrollBy(0, -deltaY);
                 }
@@ -68,17 +67,14 @@ public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
         }
     }
 
-    @Override
-    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-        super.onScrolled(recyclerView, dx, dy);
-    }
-
     /**
      * 设置上拉加载更多功能是否可用
+     *
+     * @param enabled true 表示上拉加载更多可用
      */
     public void setLoadMoreEnabled(boolean enabled) {
         mLoadMoreEnabled = enabled;
-        // 上拉加载更多不可用时，隐藏对应布局
+        // “上拉加载更多”可用时,显示对应布局,否则隐藏
         mAdapterWrapper.setLoadItemVisibility(enabled);
         if (enabled) {
             setLoadMoreFinish(false);
@@ -87,6 +83,8 @@ public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
 
     /**
      * 设置LoadMore Item为加载完成状态, 上拉加载更多完成时调用
+     *
+     * @param isLoadAll 加载完成时时候已经加载完全部的数据
      */
     public void setLoadMoreFinish(boolean isLoadAll) {
         mLoading = false;
@@ -96,6 +94,8 @@ public class SwipeToLoadHelper extends RecyclerView.OnScrollListener {
 
     /**
      * 上拉操作触发时调用的接口
+     *
+     * @param loadMoreListener 上拉加载更多的回调监听
      */
     public void setLoadMoreListener(LoadMoreListener loadMoreListener) {
         mListener = loadMoreListener;

@@ -20,9 +20,6 @@ import butterknife.ButterKnife;
 
 public class AdapterWrapper extends RecyclerView.Adapter {
 
-    /**
-     * load_more 上拉加载更多
-     */
     private static final int ITEM_TYPE_LOAD = Integer.MAX_VALUE / 2;
     private RecyclerView.Adapter mAdapter;
     private boolean mShowLoadItem = true;
@@ -61,15 +58,17 @@ public class AdapterWrapper extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
+        // 这里是关键,当 item 数目大于等于 pageSize,即加载内容够一页，才显示 底部加载更多的条目
         mShowLoadItem = mAdapter.getItemCount() >= mPageSize;
+        // 需要显示加载更多,则 AdapterWrapper 的 getItemCount 需要在控制真正加载数据的 Adapter 的基础上 +1
         return mShowLoadItem ? mAdapter.getItemCount() + 1 : mAdapter.getItemCount();
     }
 
     @Override
     public int getItemViewType(int position) {
-        // 位置是最后一个时, wrapper进行拦截
+        // 位置是最后一个时, AdapterWrapper进行拦截
         if (mShowLoadItem && position == getItemCount() - 1) {
-            return ITEM_TYPE_LOAD;// 注意要避免和原生adapter返回值重复
+            return ITEM_TYPE_LOAD;  // 注意要避免和原生adapter返回值重复
         }
         // 其他情况交给原生adapter处理
         return mAdapter.getItemViewType(position);
