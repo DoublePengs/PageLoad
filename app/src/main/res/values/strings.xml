@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PageLoad</string>
+    <string name="title_android">Android</string>
+    <string name="title_web">前端</string>
+    <string name="title_ios">IOS</string>
+
+    <string name="load_more_text">上拉加载更多</string>
+    <string name="loading_text">正在加载…</string>
+    <string name="load_all_text">没有更多数据</string>
+</resources>
