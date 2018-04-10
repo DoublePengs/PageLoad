@@ -1,6 +1,5 @@
 package com.glp.pageload.bean;
 
-import java.util.List;
 
 /**
  * Created by Guolipeng on 2018/4/8.
@@ -9,7 +8,7 @@ import java.util.List;
 public class HttpResult<T> {
 
     private boolean error;
-    private List<T> results;
+    private T results;
 
     public boolean isError() {
         return error;
@@ -19,11 +18,11 @@ public class HttpResult<T> {
         this.error = error;
     }
 
-    public List<T> getResults() {
+    public T getResults() {
         return results;
     }
 
-    public void setResults(List<T> results) {
+    public void setResults(T results) {
         this.results = results;
     }
 }

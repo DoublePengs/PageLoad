@@ -43,6 +43,8 @@ public abstract class MySubscriber<T> extends Subscriber<T> {
             msg = "网络连接不上";
         } else if (e instanceof JsonSyntaxException || e instanceof MalformedJsonException) {
             msg = "数据解析出错";
+        } else if (e instanceof DataErrorException) {
+            msg = e.getMessage();
         } else {
             Log.e("MySubscriber", "onError --- msg:" + msg + "  Exception:" + e.toString() + e.getStackTrace()[0].getClassName() + e.getStackTrace()[0].getMethodName());
         }

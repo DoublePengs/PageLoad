@@ -20,9 +20,6 @@ public interface DataSource {
         void onSubscription(Subscription subscription);
     }
 
-    void getAndroidArticleList(String category, int pageSize, int page, RequestCallback callback);
+    void getArticleList(String category, int pageSize, int page, RequestCallback callback);
 
-    void getWebArticleList(String category, int pageSize, int page, RequestCallback callback);
-
-    void getIOSArticleList(String category, int pageSize, int page, RequestCallback callback);
 }

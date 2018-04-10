@@ -6,6 +6,7 @@ import com.glp.pageload.BuildConfig;
 import com.glp.pageload.bean.ArticleBean;
 import com.glp.pageload.bean.HttpResult;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -16,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -66,10 +68,11 @@ public class HttpRepository implements DataSource {
 
 
     @Override
-    public void getAndroidArticleList(String category, int pageSize, int page, final RequestCallback callback) {
-        Subscription subscription = mHttpMethod.getAndroidList(category, pageSize, page)
-                .compose(this.<HttpResult<ArticleBean>>applySchedulers())
-                .subscribe(new MySubscriber<HttpResult<ArticleBean>>() {
+    public void getArticleList(String category, int pageSize, int page, final RequestCallback callback) {
+        Subscription subscription = mHttpMethod.getArticleList(category, pageSize, page)
+                .compose(this.<HttpResult<List<ArticleBean>>>applySchedulers())
+                .map(new HttpResultFunc<List<ArticleBean>>())
+                .subscribe(new MySubscriber<List<ArticleBean>>() {
                     @Override
                     protected void onMyCompleted() {
                     }
@@ -80,21 +83,11 @@ public class HttpRepository implements DataSource {
                     }
 
                     @Override
-                    protected void onMyNext(HttpResult<ArticleBean> result) {
-                        callback.onDataLoaded(result);
+                    protected void onMyNext(List<ArticleBean> articleList) {
+                        callback.onDataLoaded(articleList);
                     }
                 });
         callback.onSubscription(subscription);
-    }
-
-    @Override
-    public void getWebArticleList(String category, int pageSize, int page, RequestCallback callback) {
-
-    }
-
-    @Override
-    public void getIOSArticleList(String category, int pageSize, int page, RequestCallback callback) {
-
     }
 
 
@@ -110,4 +103,15 @@ public class HttpRepository implements DataSource {
                     .observeOn(AndroidSchedulers.mainThread());
         }
     };
+
+    private class HttpResultFunc<T> implements Func1<HttpResult<T>, T> {
+        @Override
+        public T call(HttpResult<T> result) {
+            if (!result.isError()) {
+                return result.getResults();
+            } else {
+                throw new DataErrorException(result);
+            }
+        }
+    }
 }

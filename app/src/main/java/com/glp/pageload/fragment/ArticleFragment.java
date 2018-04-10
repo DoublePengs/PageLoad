@@ -79,7 +79,7 @@ public class ArticleFragment extends BaseFragment {
         mLoadMoreHelper = new SwipeToLoadHelper(mRv, mWrapper);
         mRv.setAdapter(mWrapper);
         mRv.addItemDecoration(new RecyclerViewItemDecoration(mContext, LinearLayoutManager.HORIZONTAL));
-        getAndroidList(mPageSize, mPage);
+        getArticleList(mPageSize, mPage);
         initListener();
     }
 
@@ -92,7 +92,7 @@ public class ArticleFragment extends BaseFragment {
                 mLoadMoreHelper.setLoadMoreEnabled(false);
 
                 mPage = 1;
-                getAndroidList(mPageSize, mPage);
+                getArticleList(mPageSize, mPage);
             }
         });
         mLoadMoreHelper.setLoadMoreListener(new SwipeToLoadHelper.LoadMoreListener() {
@@ -101,44 +101,42 @@ public class ArticleFragment extends BaseFragment {
                 // 请求更多数据时禁用SwipeRefresh功能
                 mRefreshLayout.setEnabled(false);
 
-                getAndroidList(mPageSize, ++mPage);
+                getArticleList(mPageSize, ++mPage);
             }
         });
     }
 
-    private void getAndroidList(final int pageSize, int page) {
-        HttpRepository.getInstance(mContext).getAndroidArticleList(getArguments().getString(TITLE), pageSize, page, new DataSource.RequestCallback<HttpResult<ArticleBean>>() {
+    /**
+     * 请求文章列表
+     *
+     * @param pageSize 每页数目
+     * @param page     请求的当前页码
+     */
+    private void getArticleList(final int pageSize, int page) {
+        HttpRepository.getInstance(mContext).getArticleList(getArguments().getString(TITLE), pageSize, page, new DataSource.RequestCallback<List<ArticleBean>>() {
             @Override
-            public void onDataLoaded(HttpResult<ArticleBean> result) {
+            public void onDataLoaded(List<ArticleBean> articleList) {
                 resetRefreshLayout();
 
-                if (result.isError()) {
-                    Toast.makeText(mContext, "请求出错", Toast.LENGTH_SHORT).show();
-                    if (mPage != 1) {
-                        mPage--;
-                    }
-                } else {
-                    if (mPage == 1) {
-                        mList.clear();
-                    }
-                    List<ArticleBean> newData = result.getResults();
-                    mList.addAll(newData);
-
-                    // 将请求回来的数据添加进 mList 数据源,如果不够一页内容,则禁用上拉加载更多
-                    mLoadMoreHelper.setLoadMoreEnabled(mList.size() >= mPageSize);
-                    // 设置加载完成,通过新加载回来的数据与pageSize的关系来判断还有没有更多内容
-                    mLoadMoreHelper.setLoadMoreFinish(newData.size() < mPageSize);
+                if (mPage == 1) {
+                    mList.clear();
                 }
+                mList.addAll(articleList);
+
+                // 将请求回来的数据添加进 mList 数据源,如果不够一页内容,则禁用上拉加载更多
+                mLoadMoreHelper.setLoadMoreEnabled(mList.size() >= mPageSize);
+                // 设置加载完成,通过新加载回来的数据与pageSize的关系来判断还有没有更多内容
+                mLoadMoreHelper.setLoadMoreFinish(articleList.size() < mPageSize);
+
             }
 
             @Override
             public void onDataError(String msg) {
                 resetRefreshLayout();
-                mLoadMoreHelper.setLoadMoreFinish(false);
-
                 if (mPage != 1) {
                     mPage--;
                 }
+                mLoadMoreHelper.setLoadMoreFinish(false);
                 Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
             }
 

@@ -3,6 +3,8 @@ package com.glp.pageload.http;
 import com.glp.pageload.bean.ArticleBean;
 import com.glp.pageload.bean.HttpResult;
 
+import java.util.List;
+
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import rx.Observable;
@@ -15,5 +17,5 @@ import rx.Observable;
 public interface HttpMethod {
 
     @GET("data/{category}/{page_size}/{page}")
-    Observable<HttpResult<ArticleBean>> getAndroidList(@Path("category") String category, @Path("page_size") int pageSize, @Path("page") int page);
+    Observable<HttpResult<List<ArticleBean>>> getArticleList(@Path("category") String category, @Path("page_size") int pageSize, @Path("page") int page);
 }
